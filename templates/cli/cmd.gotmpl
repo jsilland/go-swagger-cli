@@ -55,16 +55,16 @@ func {{ camelize .Name }}(ctx context.Context, client ClientService) *cobra.Comm
   	{{ range .Params }}
 		{{ if .IsNullable }}
 			{{ if eq .GoType "int64" }}
-				command.PersistentFlags().Int64Var(parameters.{{ .ID }}, "{{ camelize .ID }}", {{ if .HasDefault }}{{ printf "%#v" .Default }}{{else}}0{{end}}, "{{ .Description }}")
+				parameters.{{ .ID }} = command.PersistentFlags().Int64("{{ camelize .ID }}", {{ if .HasDefault }}{{ printf "%#v" .Default }}{{else}}0{{end}}, "{{ .Description }}")
 			{{ end }}
 			{{ if eq .GoType "string" }}
-				command.PersistentFlags().StringVar(parameters.{{ .ID }}, "{{ camelize .ID }}", {{ if .HasDefault }}{{ printf "%#v" .Default }}{{else}}""{{end}}, "{{ .Description }}")
+				parameters.{{ .ID }} = command.PersistentFlags().String("{{ camelize .ID }}", {{ if .HasDefault }}{{ printf "%#v" .Default }}{{else}}""{{end}}, "{{ .Description }}")
 			{{ end }}
 			{{ if eq .GoType "float32" }}
-				command.PersistentFlags().Float32Var(parameters.{{ .ID }}, "{{ camelize .ID }}", {{ if .HasDefault }}{{ printf "%#v" .Default }}{{else}}0{{end}}, "{{ .Description }}")
+				parameters.{{ .ID }} = command.PersistentFlags().Float32("{{ camelize .ID }}", {{ if .HasDefault }}{{ printf "%#v" .Default }}{{else}}0{{end}}, "{{ .Description }}")
 			{{ end }}
 			{{ if eq .GoType "bool" }}
-				command.PersistentFlags().BoolVar(parameters.{{ .ID }}, "{{ camelize .ID }}", {{ if .HasDefault }}{{ printf "%#v" .Default }}{{else}}false{{end}}, "{{ .Description }}")
+				parameters.{{ .ID }} = command.PersistentFlags().Bool("{{ camelize .ID }}", {{ if .HasDefault }}{{ printf "%#v" .Default }}{{else}}false{{end}}, "{{ .Description }}")
 			{{ end }}
 		{{ else }}
 			{{ if eq .GoType "int64" }}
