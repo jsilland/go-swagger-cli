@@ -14,6 +14,8 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
+	"github.com/go-openapi/strfmt"
 )
 
 func Command(ctx context.Context, client ClientService) *cobra.Command {
@@ -53,6 +55,7 @@ func {{ camelize .Name }}(ctx context.Context, client ClientService) *cobra.Comm
 	parameters.Context = ctx
 
   	{{ range .Params }}
+	  	// {{ .GoType }}
 		{{ if .IsNullable }}
 			{{ if eq .GoType "int64" }}
 				parameters.{{ .ID }} = command.PersistentFlags().Int64("{{ camelize .ID }}", {{ if .HasDefault }}{{ printf "%#v" .Default }}{{else}}0{{end}}, "{{ .Description }}")
@@ -66,6 +69,9 @@ func {{ camelize .Name }}(ctx context.Context, client ClientService) *cobra.Comm
 			{{ if eq .GoType "bool" }}
 				parameters.{{ .ID }} = command.PersistentFlags().Bool("{{ camelize .ID }}", {{ if .HasDefault }}{{ printf "%#v" .Default }}{{else}}false{{end}}, "{{ .Description }}")
 			{{ end }}
+			{{ if eq .GoType "strfmt.DateTime" }}
+				command.Flags().Var(newDateTimeValue(&(parameters.{{ .ID }})), "{{ camelize .ID }}", "{{ .Description }}")
+			{{ end }}
 		{{ else }}
 			{{ if eq .GoType "int64" }}
 				command.PersistentFlags().Int64Var(&parameters.{{ .ID }}, "{{ camelize .ID }}", {{ if .HasDefault }}{{ printf "%#v" .Default }}{{else}}0{{end}}, "{{ .Description }}")
@@ -78,6 +84,10 @@ func {{ camelize .Name }}(ctx context.Context, client ClientService) *cobra.Comm
 			{{ end }}
 			{{ if eq .GoType "bool" }}
 				command.PersistentFlags().BoolVar(&parameters.{{ .ID }}, "{{ camelize .ID }}", {{ if .HasDefault }}{{ printf "%#v" .Default }}{{else}}false{{end}}, "{{ .Description }}")
+			{{ end }}
+			{{ if eq .GoType "strfmt.DateTime" }}
+				parameters.{{ .ID }} = strfmt.DateTime(time.Now())
+				command.Flags().Var(newDateTimeValue(&(parameters.{{ .ID }})), "{{ camelize .ID }}", "{{ .Description }}")
 			{{ end }}
 			{{ if not .HasDefault }}
 				command.MarkPersistentFlagRequired("{{ camelize .ID }}")
@@ -98,4 +108,24 @@ func printPayload(value interface{}) error {
 
 	_, err = os.Stdout.Write(bytes)
 	return err
+}
+
+type dateTimeValue struct {
+	v *strfmt.DateTime
+}
+
+func (dtv *dateTimeValue) String() string {
+	return time.Time(*dtv.v).Format(strfmt.ISO8601LocalTime)
+}
+
+func (dtv *dateTimeValue) Set(flag string) error {
+	return dtv.v.UnmarshalText([]byte(flag))
+}
+
+func (dtv *dateTimeValue) Type() string {
+	return "dateTime"
+}
+
+func newDateTimeValue(v *strfmt.DateTime) pflag.Value {
+	return &dateTimeValue{v}
 }

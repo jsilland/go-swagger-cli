@@ -79,7 +79,7 @@ import (
     // + import client package here
 )
 
-function main() {
+func main() {
     command := client.NewCommandWithDefaultClient()
     if _, err := command.ExecuteC(); err != nil {
 		fmt.Errorf(err.Error())
