@@ -39,7 +39,7 @@ func {{ camelize .Name }}(ctx context.Context, client ClientService) *cobra.Comm
 		RunE: func(cmd *cobra.Command, args []string) error {
 			{{ if .SuccessResponse }}
 				{{ if .SuccessResponse.Schema }}
-					result, err := client.{{ pascalize .Name }}(parameters, nil)
+					result, err := client.{{ pascalize .Name }}(parameters{{ if .Authorized }}, nil{{end}})
 					if err != nil {
 						return err
 					}
